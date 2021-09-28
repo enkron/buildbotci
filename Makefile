@@ -1,4 +1,4 @@
-all: buildbot-master buildbot-worker
+all: buildbot-master buildbot-worker git-server
 
 buildbot-master:
 	docker run \
@@ -18,13 +18,27 @@ buildbot-worker:
 		--env-file ./worker/env \
 		docker.io/buildbot/buildbot-worker:master
 
+git-server:
+	docker run \
+		--name=fserver \
+		--hostname=fserver \
+		--network=buildbotci \
+		-d \
+		-p 3000:3000 \
+		docker.io/gogs/gogs:latest && \
+	sleep 5 && \
+	curl \
+		-XPOST "http://localhost:3000/install" \
+		-d @./gogs_install.properties
+
 build-master-image:
 	docker build -t buildbot_master_img:master -f master/Dockerfile .
 bi: build-master-image
 
 clean:
 	docker stop master; docker rm master; \
-	docker stop worker; docker rm worker
+	docker stop worker; docker rm worker; \
+	docker stop fserver; docker rm fserver
 c: clean
 
 clean-image:

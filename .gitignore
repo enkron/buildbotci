@@ -1,2 +1,3 @@
 worker/env
 master/master.cfg
+gogs_install.properties
