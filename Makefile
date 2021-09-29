@@ -41,6 +41,12 @@ clean:
 	docker stop fserver; docker rm fserver
 c: clean
 
+clean-buildbot-nodes:
+	docker stop master; docker rm master; \
+	docker stop worker; docker rm worker
+
+rebuild-buildbot-nodes: clean-buildbot-nodes clean-image build-master-image buildbot-master buildbot-worker
+
 clean-image:
-	docker rmi localhost/buildbot_master_img:master
+	docker rmi buildbot_master_img:master
 ci: clean-image
