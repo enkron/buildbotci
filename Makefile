@@ -16,7 +16,7 @@ buildbot-worker:
 		--network=buildbotci \
 		-d \
 		--env-file ./worker/env \
-		docker.io/buildbot/buildbot-worker:master
+		buildbot_worker_img:master
 
 git-server:
 	docker run \
@@ -31,9 +31,10 @@ git-server:
 		-XPOST "http://localhost:3000/install" \
 		-d @./gogs_install.properties
 
-build-master-image:
-	docker build -t buildbot_master_img:master -f master/Dockerfile .
-bi: build-master-image
+build-images:
+	docker build -t buildbot_master_img:master -f master/Dockerfile .; \
+	docker build -t buildbot_worker_img:master -f worker/Dockerfile .
+bi: build-images
 
 clean:
 	docker stop master; docker rm master; \
@@ -45,8 +46,9 @@ clean-buildbot-nodes:
 	docker stop master; docker rm master; \
 	docker stop worker; docker rm worker
 
-rebuild-buildbot-nodes: clean-buildbot-nodes clean-image build-master-image buildbot-master buildbot-worker
+rebuild-buildbot-nodes: clean-buildbot-nodes clean-images build-images buildbot-master buildbot-worker
 
-clean-image:
-	docker rmi buildbot_master_img:master
-ci: clean-image
+clean-images:
+	docker rmi buildbot_master_img:master; \
+	docker rmi buildbot_worker_img:master
+ci: clean-images
